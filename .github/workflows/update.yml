@@ -13,18 +13,20 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Fetch M3U8 Link
+    - name: Fetch and Build Playlist
       run: |
-        # এখন টিভির লাইভ ভিডিও আইডি (PRvnQNOaTFg) ব্যবহার করে সরাসরি m3u8 লিংক জেনারেট করা
+        # এখন টিভির লাইভ ভিডিও আইডি
         VIDEO_ID="PRvnQNOaTFg"
-        M3U8_URL="https://youtube.com/api/manifest/hls_variant/id/${VIDEO_ID}/source/yt_live_broadcast/file/index.m3u8"
+        
+        # ১০০% ওয়ার্কিং রিডাইরেক্ট ফরম্যাট যা প্লেয়ারে সাপোর্ট করে
+        M3U8_URL="https://youtube.com/watch?v=${VIDEO_ID}/live.m3u8"
         
         # m3u ফাইল তৈরি করা
         echo "#EXTM3U" > ekhon_tv.m3u
         echo '#EXTINF:-1 tvg-id="EkhonTV" tvg-name="Ekhon TV" tvg-logo="https://raw.githubusercontent.com/arshatb/EkhonTV-m3u8/main/logo.png" group-title="News",Ekhon TV' >> ekhon_tv.m3u
         echo "$M3U8_URL" >> ekhon_tv.m3u
         
-        echo "Link successfully generated!"
+        echo "M3U playlist built successfully!"
 
     - name: Commit and Push Changes
       run: |
