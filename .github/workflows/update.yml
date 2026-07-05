@@ -2,9 +2,8 @@ name: Auto Update M3U8
 
 on:
   schedule:
-    # প্রতি ৩ ঘণ্টা পর পর স্বয়ংক্রিয়ভাবে রান হবে
     - cron: '0 */3 * * *'
-  workflow_dispatch: # ম্যানুয়ালি রান করার অপশন
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,32 +13,25 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Install Python and Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python3-pip ffmpeg
-        python3 -m pip install --upgrade pip
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
 
-    - name: Install Latest yt-dlp
+    - name: Install yt-dlp
       run: |
-        # সবসময় অফিশিয়াল লেটেস্ট ভার্সন ইন্সটল হবে
-        pip install --no-cache-dir -U yt-dlp
+        python -m pip install --upgrade pip
+        pip install --no-cache-dir yt-dlp
 
     - name: Fetch M3U8 Link
       run: |
-        # ইউটিউব লাইভ থেকে লিংক বের করার সবচেয়ে শক্তিশালী কমান্ড
-        M3U8_URL=$(yt-dlp --quiet --no-warnings --format "best" --get-url "https://www.youtube.com/live/PRvnQNOaTFg" || echo "FAILED")
+        # সরাসরি লাইভ URL থেকে লিংক এক্সট্র্যাক্ট করা
+        M3U8_URL=$(yt-dlp --quiet --no-warnings --format "best" --get-url "https://www.youtube.com/live/PRvnQNOaTFg")
         
-        if [ "$M3U8_URL" = "FAILED" ] || [ -z "$M3U8_URL" ]; then
-          echo "Error: Could not fetch M3U8 link from YouTube."
-          exit 1
-        fi
-        
-        # m3u ফাইল তৈরি করা
+        # ফাইল তৈরি করা
         echo "#EXTM3U" > ekhon_tv.m3u
         echo '#EXTINF:-1 tvg-id="EkhonTV" tvg-name="Ekhon TV" tvg-logo="https://raw.githubusercontent.com/arshatb/EkhonTV-m3u8/main/logo.png" group-title="News",Ekhon TV' >> ekhon_tv.m3u
         echo "$M3U8_URL" >> ekhon_tv.m3u
-        echo "Link successfully fetched and written to file."
 
     - name: Commit and Push Changes
       run: |
