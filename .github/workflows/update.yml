@@ -2,7 +2,8 @@ name: Auto Update M3U8
 
 on:
   schedule:
-    - cron: '0 0 * * *' # এটি দিনে একবার রান হলেই চলবে, কারণ লিংক ফিক্সড থাকবে
+    # প্রতি ১ ঘণ্টা পর পর লিংক একদম সতেজ রাখবে যাতে কখনো বন্ধ না হয়
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -13,24 +14,17 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Generate Working IPTV Link
-      run: |
-        # এখন টিভির লাইভ ভিডিও আইডি
-        VIDEO_ID="PRvnQNOaTFg"
-        
-        # পপুলার ও ১০০% ওয়ার্কিং ইউটিউব-টু-m3u8 প্রক্সি গেটওয়ে
-        M3U8_URL="https://coost.live/youtube/stream/${VIDEO_ID}.m3u8"
-        
-        # m3u ফাইল তৈরি করা
-        echo "#EXTM3U" > ekhon_tv.m3u
-        echo '#EXTINF:-1 tvg-id="EkhonTV" tvg-name="Ekhon TV" tvg-logo="https://raw.githubusercontent.com/arshatb/EkhonTV-m3u8/main/logo.png" group-title="News",Ekhon TV' >> ekhon_tv.m3u
-        echo "$M3U8_URL" >> ekhon_tv.m3u
-        
-        echo "IPTV Playlist generated successfully!"
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Run Grabber Script
+      run: python grab.py
 
     - name: Commit and Push Changes
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add ekhon_tv.m3u
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Updated Live Link" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Updated Live Link with Token" && git push)
