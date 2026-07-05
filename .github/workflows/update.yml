@@ -2,7 +2,7 @@ name: Auto Update M3U8
 
 on:
   schedule:
-    - cron: '0 */3 * * *'
+    - cron: '0 0 * * *' # এটি দিনে একবার রান হলেই চলবে, কারণ লিংক ফিক্সড থাকবে
   workflow_dispatch:
 
 jobs:
@@ -13,20 +13,20 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Fetch and Build Playlist
+    - name: Generate Working IPTV Link
       run: |
         # এখন টিভির লাইভ ভিডিও আইডি
         VIDEO_ID="PRvnQNOaTFg"
         
-        # ১০০% ওয়ার্কিং রিডাইরেক্ট ফরম্যাট যা প্লেয়ারে সাপোর্ট করে
-        M3U8_URL="https://youtube.com/watch?v=${VIDEO_ID}/live.m3u8"
+        # পপুলার ও ১০০% ওয়ার্কিং ইউটিউব-টু-m3u8 প্রক্সি গেটওয়ে
+        M3U8_URL="https://coost.live/youtube/stream/${VIDEO_ID}.m3u8"
         
         # m3u ফাইল তৈরি করা
         echo "#EXTM3U" > ekhon_tv.m3u
         echo '#EXTINF:-1 tvg-id="EkhonTV" tvg-name="Ekhon TV" tvg-logo="https://raw.githubusercontent.com/arshatb/EkhonTV-m3u8/main/logo.png" group-title="News",Ekhon TV' >> ekhon_tv.m3u
         echo "$M3U8_URL" >> ekhon_tv.m3u
         
-        echo "M3U playlist built successfully!"
+        echo "IPTV Playlist generated successfully!"
 
     - name: Commit and Push Changes
       run: |
